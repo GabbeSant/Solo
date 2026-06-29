@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+
+# --- Conteúdo pessoal / privado (NÃO versionar) ---
+# Estes documentos de discovery e planejamento contêm informações pessoais
+# (vícios, metas, problemas, perfil). Ficam só localmente, fora do git.
+VISION.md
+PROJECT_CONTEXT.md
+DOMAIN_MODEL.md
+DOMAIN_REVIEW.md
+ARCHITECTURE_DECISIONS.md
