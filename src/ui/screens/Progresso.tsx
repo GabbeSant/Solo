@@ -9,6 +9,7 @@ import {
 } from '../../domain/streaks'
 import { previousDateKey, todayKey, type DailyRecord, type Habit, type Skill, type Win } from '../../domain/types'
 import { Habilidades } from '../components/Habilidades'
+import { RevisaoSemanal } from '../components/RevisaoSemanal'
 import { BotaoExcluir, EstadoVazio, estiloRotuloSecao, estiloSelect, JanelaSistema } from '../design/Primitivas'
 import { IconeBroto, IconeChama, IconeEstrela, IconeFaisca } from '../design/Icone'
 
@@ -37,6 +38,8 @@ export function Progresso() {
       </header>
 
       <SequenciaPrincipal streak={streak} />
+
+      <RevisaoSemanal />
 
       {/* Duas colunas no desktop: à esquerda a consistência, à direita a prova de crescimento. */}
       <div className="flex flex-col gap-9 lg:flex-row lg:gap-10">

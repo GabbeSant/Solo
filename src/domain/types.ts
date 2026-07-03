@@ -4,6 +4,9 @@
 /** Data no formato `YYYY-MM-DD` (chave do registro diário). */
 export type DateKey = string
 
+/** Semana identificada pela `DateKey` da sua segunda-feira (chave da revisão semanal). */
+export type WeekKey = string
+
 export type AreaId = string
 export type HabitId = string
 
@@ -52,6 +55,17 @@ export const REFLECTION_QUESTIONS: ReflectionQuestion[] = [
   { id: 'melhor', prompt: 'O que poderia ter feito melhor?' },
   { id: 'sentindo', prompt: 'Como estou me sentindo?' },
   { id: 'amanha', prompt: 'Uma coisa que quero fazer diferente amanhã.' },
+]
+
+/**
+ * Perguntas fixas da revisão semanal (Etapa 13a). Fecham o "loop da semana",
+ * no mesmo espírito das perguntas da reflexão noturna: guiadas, não campos abertos
+ * (Aprendizado #7). Constantes, como as da reflexão.
+ */
+export const WEEKLY_REVIEW_QUESTIONS: ReflectionQuestion[] = [
+  { id: 'avancei', prompt: 'O que avancei nesta semana?' },
+  { id: 'travou', prompt: 'O que travou — e o que aprendi com isso?' },
+  { id: 'foco', prompt: 'Qual o foco da próxima semana?' },
 ]
 
 /** Reflexão noturna: fechamento do dia. */
@@ -155,6 +169,19 @@ export interface Identity {
   createdAt: string
 }
 
+/**
+ * Revisão semanal: fechamento da semana (Etapa 13a). Um documento por semana,
+ * indexado pela segunda-feira. Espelha o `DailyRecord` na escala da semana.
+ */
+export interface WeeklyReview {
+  /** Segunda-feira da semana, `YYYY-MM-DD`. Chave primária. */
+  weekKey: WeekKey
+  /** Respostas indexadas pelo id da pergunta. Ausência = não respondida. */
+  answers: Record<string, string>
+  /** Momento em que a semana foi concluída (ISO). Ausente = ainda aberta. */
+  closedAt?: string
+}
+
 /** Devolve a `DateKey` local de hoje (sem fuso UTC trocando o dia). */
 export function todayKey(d: Date = new Date()): DateKey {
   const ano = d.getFullYear()
@@ -167,4 +194,23 @@ export function todayKey(d: Date = new Date()): DateKey {
 export function previousDateKey(key: DateKey): DateKey {
   const [ano, mes, dia] = key.split('-').map(Number)
   return todayKey(new Date(ano, mes - 1, dia - 1))
+}
+
+/**
+ * `WeekKey` (segunda-feira) da semana que contém a data dada. Semana começa na
+ * segunda. Opera em data local (sem fuso UTC trocando o dia).
+ */
+export function weekKey(d: Date | DateKey = new Date()): WeekKey {
+  const base =
+    typeof d === 'string'
+      ? (() => {
+          const [ano, mes, dia] = d.split('-').map(Number)
+          return new Date(ano, mes - 1, dia)
+        })()
+      : d
+  // getDay(): 0=domingo … 6=sábado. Recuo até a segunda-feira.
+  const recuoAteSegunda = (base.getDay() + 6) % 7
+  return todayKey(
+    new Date(base.getFullYear(), base.getMonth(), base.getDate() - recuoAteSegunda),
+  )
 }

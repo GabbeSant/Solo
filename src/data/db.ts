@@ -1,7 +1,7 @@
 // Adaptador de persistência local (IndexedDB via Dexie).
 // Trocável sem tocar no domínio — ver src/domain/types.ts.
 import Dexie, { type Table } from 'dexie'
-import type { Area, AreaId, DailyRecord, DateKey, Goal, Habit, HabitCheckInStatus, HabitId, Identity, Skill, Win } from '../domain/types'
+import type { Area, AreaId, DailyRecord, DateKey, Goal, Habit, HabitCheckInStatus, HabitId, Identity, Skill, WeeklyReview, WeekKey, Win } from '../domain/types'
 import { todayKey } from '../domain/types'
 
 class SoloDB extends Dexie {
@@ -12,6 +12,7 @@ class SoloDB extends Dexie {
   skills!: Table<Skill, string>
   goals!: Table<Goal, string>
   identities!: Table<Identity, string>
+  weeklyReviews!: Table<WeeklyReview, WeekKey>
 
   constructor() {
     super('solo')
@@ -70,6 +71,17 @@ class SoloDB extends Dexie {
       skills: 'id, areaId',
       goals: 'id',
       identities: 'id',
+    })
+    // v8: revisões semanais (WeeklyReview) — fechamento da semana (Etapa 13a). Tabela nova, sem migração.
+    this.version(8).stores({
+      dailyRecords: 'date',
+      areas: 'id',
+      habits: 'id, areaId',
+      wins: 'id, date',
+      skills: 'id, areaId',
+      goals: 'id',
+      identities: 'id',
+      weeklyReviews: 'weekKey',
     })
   }
 }
@@ -312,6 +324,38 @@ export async function getAllIdentities(): Promise<Identity[]> {
 /** Remove uma declaração de identidade pelo id. */
 export async function deleteIdentity(id: string): Promise<void> {
   await db.identities.delete(id)
+}
+
+// --- Revisão semanal (WeeklyReview) ----------------------------------------
+
+/** Lê a revisão da semana, criando uma vazia em memória se ainda não existe. */
+export async function getWeeklyReview(week: WeekKey): Promise<WeeklyReview> {
+  const existing = await db.weeklyReviews.get(week)
+  if (!existing) return { weekKey: week, answers: {} }
+  return { ...existing, answers: existing.answers ?? {} }
+}
+
+/** Grava (ou limpa, se vazia) a resposta de uma pergunta da revisão semanal. */
+export async function setWeeklyReviewAnswer(
+  week: WeekKey,
+  questionId: string,
+  text: string,
+): Promise<void> {
+  const review = await getWeeklyReview(week)
+  const answers = { ...review.answers }
+  const limpo = text.trim()
+  if (limpo) answers[questionId] = limpo
+  else delete answers[questionId]
+  await db.weeklyReviews.put({ ...review, answers })
+}
+
+/** Conclui (ou reabre, com `false`) a semana — o ato cerimonial de fechamento. */
+export async function setWeeklyReviewClosed(week: WeekKey, closed: boolean): Promise<void> {
+  const review = await getWeeklyReview(week)
+  const next = { ...review }
+  if (closed) next.closedAt = new Date().toISOString()
+  else delete next.closedAt
+  await db.weeklyReviews.put(next)
 }
 
 // --- Seed (áreas + hábitos) ------------------------------------------------
