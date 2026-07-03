@@ -236,8 +236,12 @@ export async function deleteSkill(id: string): Promise<void> {
 
 // --- Metas (Goal) ----------------------------------------------------------
 
-/** Cadastra uma meta. Ignora título vazio. Devolve o id criado (ou null). */
-export async function addGoal(title: string, deadline?: DateKey | null): Promise<string | null> {
+/** Cadastra uma meta (opcionalmente como sub-meta). Ignora título vazio. Devolve o id criado (ou null). */
+export async function addGoal(
+  title: string,
+  deadline?: DateKey | null,
+  parentGoalId?: string | null,
+): Promise<string | null> {
   const limpo = title.trim()
   if (!limpo) return null
   const goal: Goal = {
@@ -245,6 +249,7 @@ export async function addGoal(title: string, deadline?: DateKey | null): Promise
     title: limpo,
     deadline: deadline || null,
     done: false,
+    parentGoalId: parentGoalId ?? null,
     createdAt: new Date().toISOString(),
   }
   await db.goals.add(goal)
@@ -274,9 +279,17 @@ export async function setGoalDone(id: string, done: boolean): Promise<void> {
   await db.goals.update(id, { done })
 }
 
-/** Remove uma meta pelo id. */
+/** Vincula (ou desvincula, com `null`) uma meta a uma meta-pai. */
+export async function setGoalParent(id: string, parentGoalId: string | null): Promise<void> {
+  await db.goals.update(id, { parentGoalId })
+}
+
+/** Remove uma meta pelo id. Sub-metas dela viram metas-raiz (não somem). */
 export async function deleteGoal(id: string): Promise<void> {
-  await db.goals.delete(id)
+  await db.transaction('rw', db.goals, async () => {
+    await db.goals.filter((g) => g.parentGoalId === id).modify({ parentGoalId: null })
+    await db.goals.delete(id)
+  })
 }
 
 // --- Identidade (Identity) -------------------------------------------------

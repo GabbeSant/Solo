@@ -122,8 +122,8 @@ export interface Skill {
 /**
  * Meta: intenção com prazo. Conecta a ação diária à direção de longo prazo
  * (diagnóstico central do Discovery: dar direção a uma rotina reativa).
- * Corte mínimo da Fase 2: sem `parentGoalId` (hierarquia), `areaId` nem enum de
- * status — `done` booleano basta. Vínculo com a missão do dia vem depois.
+ * Corte mínimo da Fase 2: sem `areaId` nem enum de status — `done` booleano basta.
+ * Hierarquia em 2 níveis (Etapa 12): só metas-raiz podem ser pai.
  */
 export interface Goal {
   /** Identificador único. */
@@ -134,6 +134,8 @@ export interface Goal {
   deadline?: DateKey | null
   /** Concluída? */
   done: boolean
+  /** Meta maior da qual esta é sub-meta. Ausente = meta-raiz. */
+  parentGoalId?: string | null
   /** Momento do cadastro (ISO) — ordena metas. */
   createdAt: string
 }

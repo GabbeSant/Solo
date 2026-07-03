@@ -8,6 +8,7 @@ import {
 } from '../../data/db'
 import { REFLECTION_QUESTIONS, todayKey, type DailyRecord } from '../../domain/types'
 import { focarCampoVitoria } from './VitoriasDoDia'
+import { IconeFaisca, IconeLua } from '../design/Icone'
 
 export function RitualNoturno() {
   const date = todayKey()
@@ -24,15 +25,22 @@ export function RitualNoturno() {
       <button
         type="button"
         onClick={() => setAberto((v) => !v)}
-        className="flex w-full items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/40 px-4 py-3 text-left transition-colors hover:border-neutral-700"
+        className={`flex w-full items-center justify-between gap-3 rounded-cartao border px-4 py-3.5 text-left transition-colors ${
+          fechado
+            ? 'border-sistema/25 bg-sistema/5 hover:border-sistema/40'
+            : 'border-linha bg-humus hover:border-pedra/50'
+        }`}
       >
-        <span className="flex items-center gap-2 text-sm text-neutral-100">
-          <span className="text-base">🌙</span>
+        <span className="flex items-center gap-2.5 text-sm text-areia">
+          <IconeLua tamanho={16} className={fechado ? 'text-sistema' : 'text-pedra'} />
           Ritual da noite
         </span>
-        <span className="text-xs font-medium text-neutral-500">
+        <span className="text-xs font-medium text-pedra">
           {fechado ? (
-            <span className="text-emerald-400">Dia fechado ✓</span>
+            <span className="flex items-center gap-1.5 text-sistema">
+              <IconeFaisca tamanho={13} className="animate-cintilar" />
+              Dia fechado
+            </span>
           ) : aberto ? (
             'Fechar'
           ) : (
@@ -42,7 +50,7 @@ export function RitualNoturno() {
       </button>
 
       {aberto && (
-        <div className="flex flex-col gap-5 rounded-xl border border-neutral-800 bg-neutral-900/40 px-4 py-5">
+        <div className="flex animate-surgir flex-col gap-5 rounded-cartao border border-linha bg-humus px-4 py-5">
           <MissaoCumprida record={record} date={date} />
 
           <div className="flex flex-col gap-4">
@@ -57,7 +65,7 @@ export function RitualNoturno() {
                   <button
                     type="button"
                     onClick={focarCampoVitoria}
-                    className="self-start text-xs font-medium text-orange-400/80 transition-colors hover:text-orange-300"
+                    className="self-start text-xs font-medium text-brasa/80 transition-colors hover:text-brasa"
                   >
                     ↑ Registrar como vitória
                   </button>
@@ -80,29 +88,27 @@ function MissaoCumprida({ record, date }: BlocoProps) {
   const resposta = record.missionAccomplished
 
   if (!temMissao) {
-    return (
-      <p className="text-xs text-neutral-600">Nenhuma missão definida hoje.</p>
-    )
+    return <p className="text-xs text-pedra/70">Nenhuma missão definida hoje.</p>
   }
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-medium text-neutral-500">Cumpri minha missão?</p>
-      <p className="text-sm text-neutral-300">{record.mission}</p>
+      <p className="font-voz text-sm italic text-pedra">Cumpri minha missão?</p>
+      <p className="font-voz text-[15px] leading-snug text-areia">{record.mission}</p>
       <div className="flex gap-2">
         <BotaoSimNao
           ativo={resposta === true}
-          ativoClasse="border-emerald-600 bg-emerald-950/40 text-emerald-300"
+          ativoClasse="border-broto/60 bg-broto/10 text-broto"
           onClick={() => setMissionAccomplished(date, resposta === true ? null : true)}
         >
-          ✓ Sim
+          Sim
         </BotaoSimNao>
         <BotaoSimNao
           ativo={resposta === false}
-          ativoClasse="border-neutral-600 bg-neutral-800/60 text-neutral-200"
+          ativoClasse="border-pedra/50 bg-relevo text-areia"
           onClick={() => setMissionAccomplished(date, resposta === false ? null : false)}
         >
-          ✗ Ainda não
+          Ainda não
         </BotaoSimNao>
       </div>
     </div>
@@ -124,8 +130,8 @@ function BotaoSimNao({
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
-        ativo ? ativoClasse : 'border-neutral-700 text-neutral-400 hover:border-neutral-500'
+      className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
+        ativo ? ativoClasse : 'border-linha text-pedra hover:border-pedra/60 hover:text-areia'
       }`}
     >
       {children}
@@ -152,7 +158,7 @@ function CampoReflexao({
 
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-neutral-500">{prompt}</span>
+      <span className="font-voz text-sm italic text-pedra">{prompt}</span>
       <textarea
         value={texto}
         rows={2}
@@ -163,7 +169,7 @@ function CampoReflexao({
           if (texto.trim() !== value.trim()) onSave(texto)
         }}
         placeholder="…"
-        className="w-full resize-none rounded-lg border border-neutral-800 bg-neutral-950/40 px-3 py-2 text-sm text-neutral-100 outline-none placeholder:text-neutral-700 focus:border-neutral-600"
+        className="w-full resize-none rounded-xl border border-linha bg-solo/60 px-3 py-2 text-sm text-areia outline-none transition-colors placeholder:text-pedra/40 focus:border-pedra/60"
       />
     </label>
   )
@@ -173,7 +179,7 @@ function NotaDoDia({ record, date }: BlocoProps) {
   const nota = record.reflection?.dayRating
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-medium text-neutral-500">Nota do dia</p>
+      <p className="font-voz text-sm italic text-pedra">Nota do dia</p>
       <div className="flex gap-2">
         {[1, 2, 3, 4, 5].map((n) => {
           const ativo = nota === n
@@ -182,10 +188,10 @@ function NotaDoDia({ record, date }: BlocoProps) {
               key={n}
               type="button"
               onClick={() => setDayRating(date, ativo ? null : n)}
-              className={`flex h-10 flex-1 items-center justify-center rounded-lg border text-sm font-semibold transition-colors ${
+              className={`flex h-11 flex-1 items-center justify-center rounded-xl border text-sm font-semibold tabular-nums transition-colors ${
                 ativo
-                  ? 'border-orange-500 bg-orange-950/40 text-orange-300'
-                  : 'border-neutral-800 text-neutral-500 hover:border-neutral-600'
+                  ? 'border-brasa/60 bg-brasa/10 text-brasa'
+                  : 'border-linha text-pedra hover:border-pedra/60 hover:text-areia'
               }`}
             >
               {n}

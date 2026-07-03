@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { getAllGoals, getDailyRecord, saveMission, setMissionGoal } from '../../data/db'
 import { todayKey, type Goal } from '../../domain/types'
+import { estiloSelect } from '../design/Primitivas'
+import { IconeAlvo } from '../design/Icone'
 
 export function MissaoDoDia() {
   const date = todayKey()
@@ -30,6 +32,7 @@ export function MissaoDoDia() {
     setEditando(false)
   }
 
+  // A missão é a frase central do dia: fala na voz serifada, não em campo de formulário.
   const editor =
     editando || !definida ? (
       <input
@@ -43,13 +46,13 @@ export function MissaoDoDia() {
           if (e.key === 'Escape') cancelar()
         }}
         placeholder="O que eu vou construir hoje?"
-        className="w-full rounded-xl border border-neutral-800 bg-neutral-900/40 px-4 py-4 text-sm text-neutral-100 outline-none placeholder:text-neutral-600 focus:border-neutral-600"
+        className="w-full rounded-cartao border border-linha bg-humus px-4 py-4 font-voz text-lg text-areia outline-none transition-colors placeholder:text-pedra/60 focus:border-pedra/70"
       />
     ) : (
       <button
         type="button"
         onClick={() => setEditando(true)}
-        className="rounded-xl border border-neutral-800 bg-neutral-900/40 px-4 py-4 text-left text-sm text-neutral-100 transition-colors hover:border-neutral-700"
+        className="rounded-cartao border border-linha bg-humus px-4 py-4 text-left font-voz text-lg leading-snug text-areia transition-colors hover:border-pedra/50"
       >
         {record.mission}
       </button>
@@ -77,12 +80,15 @@ function SeletorMetaMissao({
   const opcoes = goals.filter((g) => !g.done || g.id === goalId)
   if (opcoes.length === 0) return null
   return (
-    <label className="flex items-center gap-2 px-1 text-xs text-neutral-500">
-      <span>🎯 meta</span>
+    <label className="flex items-center gap-2 px-1 text-xs text-pedra">
+      <span className="flex items-center gap-1.5">
+        <IconeAlvo tamanho={13} />
+        meta
+      </span>
       <select
         value={goalId ?? ''}
         onChange={(e) => setMissionGoal(date, e.target.value || null)}
-        className="flex-1 rounded-md border border-neutral-800 bg-neutral-900/60 px-2 py-1 text-xs text-neutral-300 outline-none focus:border-neutral-600"
+        className={`flex-1 ${estiloSelect}`}
       >
         <option value="">—</option>
         {opcoes.map((goal) => (

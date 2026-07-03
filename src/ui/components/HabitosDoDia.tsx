@@ -2,6 +2,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db, getAllDailyRecords, getDailyRecord, setHabitCheckIn, toggleHabitCheckIn } from '../../data/db'
 import { todayKey, type DailyRecord, type Habit } from '../../domain/types'
 import { computeHabitStreak, computeRestrictiveStreak } from '../../domain/streaks'
+import { EstadoVazio } from '../design/Primitivas'
+import { IconeChama, IconeCheck } from '../design/Icone'
 
 export function HabitosDoDia() {
   const date = todayKey()
@@ -12,11 +14,7 @@ export function HabitosDoDia() {
   if (!habits || !record || !records) return null
 
   if (habits.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-neutral-800 bg-neutral-900/40 px-4 py-6 text-center text-sm text-neutral-500">
-        Nenhum hábito ainda
-      </div>
-    )
+    return <EstadoVazio>Nenhum hábito ainda</EstadoVazio>
   }
 
   return (
@@ -48,24 +46,27 @@ function HabitoConstrutivo({ habit, record, records, date }: ItemProps) {
     <button
       type="button"
       onClick={() => toggleHabitCheckIn(date, habit.id)}
-      className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm transition-colors ${
+      className={`flex w-full items-center gap-3 rounded-cartao border px-4 py-3.5 text-left text-sm transition-colors ${
         feito
-          ? 'border-emerald-800/60 bg-emerald-950/30 text-neutral-300'
-          : 'border-neutral-800 bg-neutral-900/40 text-neutral-100 hover:border-neutral-700'
+          ? 'border-broto/40 bg-broto/10 text-pedra'
+          : 'border-linha bg-humus text-areia hover:border-pedra/50'
       }`}
     >
       <span
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-xs ${
-          feito ? 'border-emerald-600 bg-emerald-600 text-neutral-950' : 'border-neutral-700'
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
+          feito ? 'border-broto bg-broto text-solo' : 'border-linha bg-solo'
         }`}
       >
-        {feito ? '✓' : ''}
+        {feito && <IconeCheck tamanho={12} className="animate-brotar" />}
       </span>
-      <span className={`flex-1 ${feito ? 'line-through decoration-neutral-600' : ''}`}>
+      <span className={`flex-1 ${feito ? 'line-through decoration-pedra/50' : ''}`}>
         {habit.name}
       </span>
       {streak > 0 && (
-        <span className="shrink-0 text-xs font-medium text-orange-400/90">🔥 {streak}</span>
+        <span className="flex shrink-0 items-center gap-1 text-xs font-medium tabular-nums text-brasa">
+          <IconeChama tamanho={12} />
+          {streak}
+        </span>
       )}
     </button>
   )
@@ -77,19 +78,20 @@ function HabitoRestritivo({ habit, record, records, date }: ItemProps) {
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm ${
+      className={`flex items-center gap-3 rounded-cartao border px-4 py-3.5 text-sm ${
         quebradoHoje
-          ? 'border-neutral-800 bg-neutral-900/40 text-neutral-400'
-          : 'border-orange-900/40 bg-orange-950/20 text-neutral-100'
+          ? 'border-linha bg-humus text-pedra'
+          : 'border-brasa/25 bg-brasa/5 text-areia'
       }`}
     >
       <div className="flex-1">
-        <p className={quebradoHoje ? 'text-neutral-400' : ''}>{habit.name}</p>
+        <p>{habit.name}</p>
         {quebradoHoje ? (
-          <p className="text-xs text-neutral-500">Quebrado hoje — recomeça amanhã</p>
+          <p className="text-xs text-pedra">Quebrado hoje — recomeça amanhã</p>
         ) : (
-          <p className="text-xs font-medium text-orange-300">
-            🔥 {dias} {dias === 1 ? 'dia' : 'dias'} sem quebrar
+          <p className="flex items-center gap-1 text-xs font-medium tabular-nums text-brasa">
+            <IconeChama tamanho={12} />
+            {dias} {dias === 1 ? 'dia' : 'dias'} sem quebrar
           </p>
         )}
       </div>
@@ -97,7 +99,7 @@ function HabitoRestritivo({ habit, record, records, date }: ItemProps) {
         <button
           type="button"
           onClick={() => setHabitCheckIn(date, habit.id, null)}
-          className="shrink-0 rounded-lg border border-neutral-700 px-3 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:border-neutral-500"
+          className="shrink-0 rounded-full border border-linha px-3 py-1.5 text-xs font-medium text-pedra transition-colors hover:border-pedra/60 hover:text-areia"
         >
           Desfazer
         </button>
@@ -105,7 +107,7 @@ function HabitoRestritivo({ habit, record, records, date }: ItemProps) {
         <button
           type="button"
           onClick={() => setHabitCheckIn(date, habit.id, 'CONFIRMED_BROKEN')}
-          className="shrink-0 rounded-lg border border-red-900/50 px-3 py-1.5 text-xs font-medium text-red-300/90 transition-colors hover:border-red-700 hover:text-red-300"
+          className="shrink-0 rounded-full border border-linha px-3 py-1.5 text-xs font-medium text-pedra transition-colors hover:border-pedra/60 hover:text-areia"
         >
           Quebrei
         </button>

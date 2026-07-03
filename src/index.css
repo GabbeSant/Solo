@@ -1,5 +1,71 @@
 @import "tailwindcss";
 
+/*
+ * Design System "Solo" — terra fértil à noite.
+ *
+ * Duas vozes tipográficas:
+ *   font-voz   (Fraunces)        — quem você está se tornando: identidade, missão, reflexão.
+ *   font-sans  (Instrument Sans) — o que você faz hoje: UI, hábitos, dados.
+ *
+ * Dois acentos com significado fixo:
+ *   broto (verde-musgo) — crescer: checks, progresso, habilidades.
+ *   brasa (âmbar)       — manter: streaks, marcos, ações principais.
+ * Um terceiro, raro:
+ *   sistema (azul etéreo) — quando o Sistema fala com você: dia fechado, marcos de sequência.
+ *
+ * Nunca vermelho para falha ou streak quebrado — dias ruins recebem neutralidade.
+ */
+@theme {
+  --color-solo: #141210; /* fundo — quase-preto com temperatura de terra */
+  --color-humus: #1e1a15; /* superfícies */
+  --color-relevo: #282218; /* superfície elevada / hover */
+  --color-linha: #2e2820; /* bordas e divisores */
+  --color-areia: #eae4d6; /* texto principal */
+  --color-pedra: #8f8778; /* texto secundário */
+  --color-broto: #9db87a; /* crescimento */
+  --color-brasa: #dda05c; /* consistência */
+  --color-sistema: #91a4d2; /* a voz do Sistema */
+
+  --font-sans: "Instrument Sans Variable", system-ui, -apple-system, sans-serif;
+  --font-voz: "Fraunces Variable", Georgia, serif;
+
+  --radius-cartao: 1rem;
+
+  --animate-brotar: brotar 300ms cubic-bezier(0.2, 0.8, 0.3, 1.15) both;
+  --animate-surgir: surgir 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-cintilar: cintilar 3s ease-in-out infinite;
+
+  @keyframes brotar {
+    from {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes surgir {
+    from {
+      transform: translateY(6px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes cintilar {
+    0%,
+    100% {
+      opacity: 0.45;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
 :root {
   color-scheme: dark;
 }
@@ -12,5 +78,28 @@ body,
 
 body {
   margin: 0;
-  background-color: #0a0a0b;
+  background-color: var(--color-solo);
+  color: var(--color-areia);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A voz serifada usa o eixo óptico baixo do Fraunces: quente, sem floreio. */
+.font-voz {
+  font-variation-settings: "opsz" 18;
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--color-brasa) 70%, transparent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -5,6 +5,12 @@ node_modules/
 dist/
 *.tsbuildinfo
 
+# Netlify (estado local do site: ID, cache)
+.netlify/
+
+# tokensave (cache local do code-graph MCP)
+.tokensave/
+
 # Editor / OS
 .DS_Store
 Thumbs.db

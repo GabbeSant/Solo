@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# App sem router (abas por estado). Fallback SPA por segurança:
+# assets, sw.js e manifest são servidos direto; só rotas sem arquivo caem no index.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

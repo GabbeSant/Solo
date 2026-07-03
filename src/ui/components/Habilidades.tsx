@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { addSkill, db, deleteSkill, getAllSkills, getAllWins } from '../../data/db'
 import type { Skill } from '../../domain/types'
+import { BotaoAcao, BotaoExcluir, estiloCampo, estiloSelect, EstadoVazio } from '../design/Primitivas'
+import { IconeBroto, IconeEstrela } from '../design/Icone'
 
 export function Habilidades() {
   const skills = useLiveQuery(() => getAllSkills(), [])
@@ -47,14 +49,14 @@ export function Habilidades() {
             if (e.key === 'Enter') cadastrar()
           }}
           placeholder="Uma habilidade que estou desenvolvendo"
-          className="w-full rounded-xl border border-neutral-800 bg-neutral-900/40 px-4 py-4 text-sm text-neutral-100 outline-none placeholder:text-neutral-600 focus:border-neutral-600"
+          className={estiloCampo}
         />
         {nome.trim().length > 0 && (
           <div className="flex items-center gap-2">
             <select
               value={areaId}
               onChange={(e) => setAreaId(e.target.value)}
-              className="rounded-lg border border-neutral-800 bg-neutral-900/40 px-3 py-2 text-xs text-neutral-300 outline-none focus:border-neutral-600"
+              className={estiloSelect}
             >
               <option value="">Sem área</option>
               {areas.map((area) => (
@@ -63,21 +65,13 @@ export function Habilidades() {
                 </option>
               ))}
             </select>
-            <button
-              type="button"
-              onClick={cadastrar}
-              className="rounded-lg border border-orange-700 bg-orange-950/40 px-4 py-2 text-xs font-semibold text-orange-300 transition-colors hover:border-orange-500"
-            >
-              🌱 Cadastrar habilidade
-            </button>
+            <BotaoAcao onClick={cadastrar}>Cadastrar habilidade</BotaoAcao>
           </div>
         )}
       </div>
 
       {skills.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-neutral-800 px-4 py-6 text-center text-sm text-neutral-600">
-          Cadastre uma capacidade que você está desenvolvendo. 🌱
-        </p>
+        <EstadoVazio>Cadastre uma capacidade que você está desenvolvendo.</EstadoVazio>
       ) : (
         <ul className="flex flex-col gap-2">
           {skills.map((skill) => (
@@ -108,31 +102,25 @@ function ItemHabilidade({
 }) {
   const area = skill.areaId ? nomeArea.get(skill.areaId) : undefined
   return (
-    <li className="flex flex-col gap-1.5 rounded-xl border border-neutral-800 bg-neutral-900/40 px-4 py-3">
+    <li className="flex flex-col gap-1.5 rounded-cartao border border-linha bg-humus px-4 py-3.5">
       <div className="flex items-center justify-between gap-3">
-        <span className="flex items-center gap-2 text-sm text-neutral-100">
-          <span className="text-base leading-none">🌱</span>
+        <span className="flex items-center gap-2.5 text-sm text-areia">
+          <IconeBroto tamanho={15} className="shrink-0 text-broto" />
           {skill.name}
-          {area && <span className="text-xs text-neutral-500">· {area}</span>}
+          {area && <span className="text-xs text-pedra">· {area}</span>}
         </span>
         <span className="flex items-center gap-3">
           {vitorias > 0 && (
-            <span className="text-xs font-medium text-orange-300">
-              🏆 {vitorias} {vitorias === 1 ? 'vitória' : 'vitórias'}
+            <span className="flex items-center gap-1 text-xs font-medium tabular-nums text-brasa">
+              <IconeEstrela tamanho={12} />
+              {vitorias} {vitorias === 1 ? 'vitória' : 'vitórias'}
             </span>
           )}
-          <button
-            type="button"
-            onClick={() => deleteSkill(skill.id)}
-            aria-label="Excluir habilidade"
-            className="shrink-0 text-neutral-600 transition-colors hover:text-red-400"
-          >
-            ✕
-          </button>
+          <BotaoExcluir onClick={() => deleteSkill(skill.id)} rotulo="Excluir habilidade" />
         </span>
       </div>
       {habitos.length > 0 && (
-        <span className="text-xs text-neutral-500">💪 alimentada por: {habitos.join(', ')}</span>
+        <span className="text-xs text-pedra">alimentada por: {habitos.join(', ')}</span>
       )}
     </li>
   )
