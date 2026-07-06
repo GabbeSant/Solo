@@ -182,6 +182,43 @@ export interface WeeklyReview {
   closedAt?: string
 }
 
+/** Rótulos dos dias da semana. Índice 0 = segunda (mesma convenção de `weekKey`). */
+export const WEEKDAY_LABELS = [
+  'Segunda',
+  'Terça',
+  'Quarta',
+  'Quinta',
+  'Sexta',
+  'Sábado',
+  'Domingo',
+] as const
+
+/**
+ * Bloco da rotina semanal (Etapa 14): grade fixa de horários que se repete toda
+ * semana. É a "estrutura" do tempo, em contraste com `DailyRecord` (o que
+ * aconteceu) — dá forma à janela livre do dia (diagnóstico: rotina reativa).
+ */
+export interface RoutineBlock {
+  /** Identificador único. */
+  id: string
+  /** Dia da semana: 0 = segunda … 6 = domingo. */
+  weekday: number
+  /** Início do bloco, `HH:MM` (24h). */
+  start: string
+  /** Fim do bloco, `HH:MM` (24h). */
+  end: string
+  /** O que acontece nesse horário, em linguagem do usuário. */
+  activity: string
+  /** Momento do cadastro (ISO). */
+  createdAt: string
+}
+
+/** Dia da semana (0 = segunda … 6 = domingo) de uma data. Opera em data local. */
+export function weekdayOf(date: DateKey): number {
+  const [ano, mes, dia] = date.split('-').map(Number)
+  return (new Date(ano, mes - 1, dia).getDay() + 6) % 7
+}
+
 /** Devolve a `DateKey` local de hoje (sem fuso UTC trocando o dia). */
 export function todayKey(d: Date = new Date()): DateKey {
   const ano = d.getFullYear()
@@ -213,4 +250,10 @@ export function weekKey(d: Date | DateKey = new Date()): WeekKey {
   return todayKey(
     new Date(base.getFullYear(), base.getMonth(), base.getDate() - recuoAteSegunda),
   )
+}
+
+/** As 7 `DateKey`s da semana (segunda → domingo). Opera em data local. */
+export function weekDateKeys(week: WeekKey): DateKey[] {
+  const [ano, mes, dia] = week.split('-').map(Number)
+  return Array.from({ length: 7 }, (_, i) => todayKey(new Date(ano, mes - 1, dia + i)))
 }

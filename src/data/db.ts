@@ -1,7 +1,7 @@
 // Adaptador de persistência local (IndexedDB via Dexie).
 // Trocável sem tocar no domínio — ver src/domain/types.ts.
 import Dexie, { type Table } from 'dexie'
-import type { Area, AreaId, DailyRecord, DateKey, Goal, Habit, HabitCheckInStatus, HabitId, Identity, Skill, WeeklyReview, WeekKey, Win } from '../domain/types'
+import type { Area, AreaId, DailyRecord, DateKey, Goal, Habit, HabitCheckInStatus, HabitId, Identity, RoutineBlock, Skill, WeeklyReview, WeekKey, Win } from '../domain/types'
 import { todayKey } from '../domain/types'
 
 class SoloDB extends Dexie {
@@ -13,6 +13,7 @@ class SoloDB extends Dexie {
   goals!: Table<Goal, string>
   identities!: Table<Identity, string>
   weeklyReviews!: Table<WeeklyReview, WeekKey>
+  routineBlocks!: Table<RoutineBlock, string>
 
   constructor() {
     super('solo')
@@ -82,6 +83,18 @@ class SoloDB extends Dexie {
       goals: 'id',
       identities: 'id',
       weeklyReviews: 'weekKey',
+    })
+    // v9: blocos de rotina semanal (RoutineBlock) — grade fixa de horários (Etapa 14). Tabela nova, sem migração.
+    this.version(9).stores({
+      dailyRecords: 'date',
+      areas: 'id',
+      habits: 'id, areaId',
+      wins: 'id, date',
+      skills: 'id, areaId',
+      goals: 'id',
+      identities: 'id',
+      weeklyReviews: 'weekKey',
+      routineBlocks: 'id, weekday',
     })
   }
 }
@@ -335,6 +348,14 @@ export async function getWeeklyReview(week: WeekKey): Promise<WeeklyReview> {
   return { ...existing, answers: existing.answers ?? {} }
 }
 
+/** Todas as revisões semanais, mais recentes primeiro. */
+export async function getAllWeeklyReviews(): Promise<WeeklyReview[]> {
+  const reviews = await db.weeklyReviews.toArray()
+  return reviews
+    .map((r) => ({ ...r, answers: r.answers ?? {} }))
+    .sort((a, b) => b.weekKey.localeCompare(a.weekKey))
+}
+
 /** Grava (ou limpa, se vazia) a resposta de uma pergunta da revisão semanal. */
 export async function setWeeklyReviewAnswer(
   week: WeekKey,
@@ -356,6 +377,40 @@ export async function setWeeklyReviewClosed(week: WeekKey, closed: boolean): Pro
   if (closed) next.closedAt = new Date().toISOString()
   else delete next.closedAt
   await db.weeklyReviews.put(next)
+}
+
+// --- Rotina semanal (RoutineBlock) ------------------------------------------
+
+/** Adiciona um bloco à rotina. Ignora atividade vazia ou horários incompletos. Devolve o id criado (ou null). */
+export async function addRoutineBlock(
+  weekday: number,
+  start: string,
+  end: string,
+  activity: string,
+): Promise<string | null> {
+  const limpo = activity.trim()
+  if (!limpo || !start || !end) return null
+  const block: RoutineBlock = {
+    id: crypto.randomUUID(),
+    weekday,
+    start,
+    end,
+    activity: limpo,
+    createdAt: new Date().toISOString(),
+  }
+  await db.routineBlocks.add(block)
+  return block.id
+}
+
+/** Todos os blocos da rotina, por dia da semana e horário de início. */
+export async function getAllRoutineBlocks(): Promise<RoutineBlock[]> {
+  const blocks = await db.routineBlocks.toArray()
+  return blocks.sort((a, b) => a.weekday - b.weekday || a.start.localeCompare(b.start))
+}
+
+/** Remove um bloco da rotina pelo id. */
+export async function deleteRoutineBlock(id: string): Promise<void> {
+  await db.routineBlocks.delete(id)
 }
 
 // --- Seed (áreas + hábitos) ------------------------------------------------

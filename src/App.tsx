@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Hoje } from './ui/screens/Hoje'
+import { Rotina } from './ui/screens/Rotina'
 import { Progresso } from './ui/screens/Progresso'
 import { Metas } from './ui/screens/Metas'
 import { ensureSeed } from './data/db'
-import { IconeAlvo, IconeBroto, IconeSol } from './ui/design/Icone'
+import { IconeAlvo, IconeBroto, IconeRelogio, IconeSol } from './ui/design/Icone'
 
-type Tela = 'hoje' | 'progresso' | 'metas'
+type Tela = 'hoje' | 'rotina' | 'progresso' | 'metas'
 
 const ABAS = [
   { id: 'hoje', rotulo: 'Hoje', Icone: IconeSol },
+  { id: 'rotina', rotulo: 'Rotina', Icone: IconeRelogio },
   { id: 'progresso', rotulo: 'Progresso', Icone: IconeBroto },
   { id: 'metas', rotulo: 'Metas', Icone: IconeAlvo },
 ] as const
@@ -24,7 +26,15 @@ export function App() {
     <div className="min-h-dvh bg-solo lg:flex">
       <BarraLateral tela={tela} onNavigate={setTela} />
       <div className="min-w-0 flex-1">
-        {tela === 'hoje' ? <Hoje /> : tela === 'progresso' ? <Progresso /> : <Metas />}
+        {tela === 'hoje' ? (
+          <Hoje />
+        ) : tela === 'rotina' ? (
+          <Rotina />
+        ) : tela === 'progresso' ? (
+          <Progresso />
+        ) : (
+          <Metas />
+        )}
       </div>
       <NavInferior tela={tela} onNavigate={setTela} />
     </div>

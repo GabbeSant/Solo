@@ -4,6 +4,7 @@ import { HabitosDoDia } from '../components/HabitosDoDia'
 import { StreakPrincipal } from '../components/StreakPrincipal'
 import { VitoriasDoDia } from '../components/VitoriasDoDia'
 import { RitualNoturno } from '../components/RitualNoturno'
+import { RotinaDeHoje } from '../components/RotinaDeHoje'
 import { AfirmacaoIdentidade } from '../components/Identidade'
 import { getAllDailyRecords, getAllIdentities, getDailyRecord, getWinsByDate } from '../../data/db'
 import { computeMainStreak } from '../../domain/streaks'
@@ -51,6 +52,8 @@ export function Hoje() {
             <AfirmacaoIdentidade />
           </div>
         </header>
+
+        <RotinaDeHoje />
 
         <TrechoDoFio rotulo="Missão do dia" aceso={missaoDefinida}>
           <MissaoDoDia />
