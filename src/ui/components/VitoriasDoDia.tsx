@@ -38,6 +38,7 @@ export function VitoriasDoDia() {
     <div className="flex flex-col gap-3">
       <input
         id={CAMPO_VITORIA_ID}
+        aria-label="Uma vitória de hoje"
         value={texto}
         onChange={(e) => setTexto(e.target.value)}
         onKeyDown={(e) => {

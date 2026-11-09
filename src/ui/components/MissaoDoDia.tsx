@@ -32,27 +32,34 @@ export function MissaoDoDia() {
     setEditando(false)
   }
 
-  // A missão é a frase central do dia: fala na voz serifada, não em campo de formulário.
+  // A missão tem uma ação explícita de salvar, além de Enter e saída do campo.
   const editor =
     editando || !definida ? (
-      <input
-        autoFocus={editando}
-        value={texto}
-        onChange={(e) => setTexto(e.target.value)}
-        onFocus={() => setEditando(true)}
-        onBlur={salvar}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') e.currentTarget.blur()
-          if (e.key === 'Escape') cancelar()
-        }}
-        placeholder="O que eu vou construir hoje?"
-        className="w-full rounded-cartao border border-linha bg-humus px-4 py-4 font-voz text-lg text-areia outline-none transition-colors placeholder:text-pedra/60 focus:border-pedra/70"
-      />
+      <div className="mission-input-row">
+        <input
+          aria-label="Missão do dia"
+          autoFocus={editando}
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          onFocus={() => setEditando(true)}
+          onBlur={salvar}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') e.currentTarget.blur()
+            if (e.key === 'Escape') cancelar()
+          }}
+          placeholder="O que eu vou construir hoje?"
+          className="w-full rounded-cartao border border-linha bg-humus px-4 py-4 font-voz text-lg text-areia outline-none transition-colors placeholder:text-pedra/60 focus:border-pedra/70"
+        />
+        <button type="button" className="mission-save" disabled={!texto.trim()} onClick={salvar}>
+          Salvar
+        </button>
+      </div>
     ) : (
       <button
         type="button"
         onClick={() => setEditando(true)}
-        className="rounded-cartao border border-linha bg-humus px-4 py-4 text-left font-voz text-lg leading-snug text-areia transition-colors hover:border-pedra/50"
+        aria-label={`Editar missão: ${record.mission}`}
+        className="mission-value rounded-cartao border border-linha bg-humus px-4 py-4 text-left font-voz text-lg leading-snug text-areia transition-colors hover:border-pedra/50"
       >
         {record.mission}
       </button>

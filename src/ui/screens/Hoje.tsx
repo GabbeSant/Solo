@@ -1,138 +1,110 @@
+﻿import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { MissaoDoDia } from '../components/MissaoDoDia'
 import { HabitosDoDia } from '../components/HabitosDoDia'
-import { StreakPrincipal } from '../components/StreakPrincipal'
 import { VitoriasDoDia } from '../components/VitoriasDoDia'
 import { RitualNoturno } from '../components/RitualNoturno'
 import { RotinaDeHoje } from '../components/RotinaDeHoje'
 import { AfirmacaoIdentidade } from '../components/Identidade'
-import { getAllDailyRecords, getAllIdentities, getDailyRecord, getWinsByDate } from '../../data/db'
-import { computeMainStreak } from '../../domain/streaks'
+import { JornadaDoDia, type ParadaDaJornada } from '../components/JornadaDoDia'
+import { getAllDailyRecords, getDailyRecord, getWinsByDate } from '../../data/db'
+import { computeMainStreak, dayQualifiesMain } from '../../domain/streaks'
 import { todayKey } from '../../domain/types'
-import { TrechoDoFio } from '../design/Fio'
-import { IconeFaisca } from '../design/Icone'
-
-const dataPorExtenso = new Date().toLocaleDateString('pt-BR', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-})
-// Só a primeira letra maiúscula: "Quarta-feira, 1 de julho".
-const dataDeHoje = dataPorExtenso.charAt(0).toUpperCase() + dataPorExtenso.slice(1)
-
-// Marcos de sequência que o Sistema reconhece (VISION: 7, 30, 100, 365).
-const MARCOS = [7, 30, 100, 365]
+import { IconeAlvo, IconeBroto, IconeChama, IconeEstrela, IconeLua } from '../design/Icone'
 
 export function Hoje() {
-  const date = todayKey()
+  // O capítulo de hoje acompanha a virada do dia e o retorno ao app.
+  const [date, setDate] = useState(todayKey)
+  useEffect(() => {
+    const atualizar = () => setDate(todayKey())
+    const timer = window.setInterval(atualizar, 30_000)
+    window.addEventListener('focus', atualizar)
+    document.addEventListener('visibilitychange', atualizar)
+    return () => {
+      window.clearInterval(timer)
+      window.removeEventListener('focus', atualizar)
+      document.removeEventListener('visibilitychange', atualizar)
+    }
+  }, [])
   const record = useLiveQuery(() => getDailyRecord(date), [date])
   const wins = useLiveQuery(() => getWinsByDate(date), [date])
-
-  // O Fio: cada trecho do dia acende quando recebe um registro.
-  const missaoDefinida = (record?.mission.trim().length ?? 0) > 0
-  const algumHabito = record
-    ? Object.values(record.habitCheckIns).some((s) => s === 'COMPLETED')
-    : false
-  const temVitoria = (wins?.length ?? 0) > 0
-  const diaFechado = record?.reflection?.dayRating !== undefined
-
-  return (
-    <div className="mx-auto flex w-full max-w-6xl justify-center gap-12 px-5 pb-28 pt-12 lg:pb-12 lg:pt-16">
-      <main className="flex w-full max-w-md flex-col text-areia">
-        <header className="mb-10 flex flex-col gap-2">
-          <p className="text-sm font-medium text-pedra">{dataDeHoje}</p>
-          <div className="flex items-center justify-between gap-3">
-            <h1 className="font-voz text-[28px] font-medium tracking-tight">Hoje</h1>
-            {/* No desktop largo a sequência migra para o painel lateral. */}
-            <span className="xl:hidden">
-              <StreakPrincipal />
-            </span>
-          </div>
-          <div className="xl:hidden">
-            <AfirmacaoIdentidade />
-          </div>
-        </header>
-
-        <RotinaDeHoje />
-
-        <TrechoDoFio rotulo="Missão do dia" aceso={missaoDefinida}>
-          <MissaoDoDia />
-        </TrechoDoFio>
-
-        <TrechoDoFio rotulo="Hábitos" aceso={algumHabito}>
-          <HabitosDoDia />
-        </TrechoDoFio>
-
-        <TrechoDoFio rotulo="Vitórias" aceso={temVitoria}>
-          <VitoriasDoDia />
-        </TrechoDoFio>
-
-        <TrechoDoFio rotulo="Noite" aceso={diaFechado} ultimo>
-          <RitualNoturno />
-        </TrechoDoFio>
-      </main>
-
-      <PainelCompanheiro />
-    </div>
-  )
-}
-
-/**
- * Painel lateral do desktop largo: a sequência e quem o usuário está se tornando,
- * sempre à vista enquanto ele constrói o dia. Some no mobile/tablet (fica no header).
- */
-function PainelCompanheiro() {
   const records = useLiveQuery(() => getAllDailyRecords(), [])
-  const identities = useLiveQuery(() => getAllIdentities(), [])
-  if (!records || !identities) return null
 
-  const streak = computeMainStreak(records)
+  if (!record || !wins || !records) {
+    return <main className="journey-page" aria-busy="true"><p>Preparando seu caminho…</p></main>
+  }
+
+  const paradas: ParadaDaJornada[] = [
+    { id: 'missao', nome: 'Missão', feito: record.mission.trim().length > 0, Icone: IconeAlvo },
+    { id: 'habitos', nome: 'Hábitos', feito: Object.values(record.habitCheckIns).includes('COMPLETED'), Icone: IconeBroto },
+    { id: 'vitorias', nome: 'Vitória', feito: wins.length > 0, Icone: IconeEstrela },
+    { id: 'noite', nome: 'Noite', feito: record.reflection?.dayRating !== undefined, Icone: IconeLua },
+  ]
+  const diasExplorados = records.filter((r) => r.date <= date && dayQualifiesMain(r)).length
+  const streak = computeMainStreak(records, date)
+  const data = new Date(`${date}T12:00:00`).toLocaleDateString('pt-BR', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  })
 
   return (
-    <aside className="hidden w-72 shrink-0 xl:block">
-      <div className="sticky top-16 flex flex-col gap-10">
-        <div className="flex flex-col gap-3">
-          <span className="text-[13px] font-medium text-pedra">Sua sequência</span>
-          <div className="flex items-baseline gap-2">
-            <span className="font-voz text-5xl font-medium tabular-nums leading-none text-areia">
-              {streak}
-            </span>
-            <span className="text-sm text-pedra">{streak === 1 ? 'dia' : 'dias'}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            {MARCOS.map((marco) => {
-              const alcancado = streak >= marco
-              return (
-                <span
-                  key={marco}
-                  className={`flex items-center gap-1 text-xs tabular-nums ${
-                    alcancado ? 'text-sistema' : 'text-pedra/50'
-                  }`}
-                >
-                  <IconeFaisca tamanho={11} className={alcancado ? '' : 'opacity-40'} />
-                  {marco}
-                </span>
-              )
-            })}
-          </div>
+    <main className="journey-page" key={date}>
+      <header className="journey-heading">
+        <div>
+          <p className="journey-date">{data}</p>
+          <h1>A aventura continua.</h1>
+        </div>
+        <div className="journey-streak" title="Missão definida e ao menos um hábito concluído por dia">
+          <IconeChama tamanho={21} />
+          <span><strong>{streak}</strong> {streak === 1 ? 'dia seguido' : 'dias seguidos'}</span>
+        </div>
+      </header>
+
+      <JornadaDoDia paradas={paradas} diasExplorados={diasExplorados} date={date} />
+
+      <div className="journey-content">
+        <div className="journey-actions">
+          <section id="missao" className="journey-mission" aria-labelledby="titulo-missao">
+            <div className="journey-section-heading">
+              <span className="journey-section-icon"><IconeAlvo tamanho={20} /></span>
+              <h2 id="titulo-missao" tabIndex={-1}>Uma missão. Um passo adiante.</h2>
+              {paradas[0].feito && <span className="journey-done-label">Definida</span>}
+            </div>
+            <p className="journey-help">Escolha algo possível para hoje. Pequeno também conta.</p>
+            <MissaoDoDia />
+          </section>
+
+          <section id="habitos" className="journey-habits" aria-labelledby="titulo-habitos">
+            <div className="journey-section-heading">
+              <span className="journey-section-icon green"><IconeBroto tamanho={20} /></span>
+              <h2 id="titulo-habitos" tabIndex={-1}>O que te move hoje</h2>
+            </div>
+            <p className="journey-help">Cada check é um pedaço do caminho.</p>
+            <HabitosDoDia />
+          </section>
         </div>
 
-        {identities.length > 0 && (
-          <div className="flex flex-col gap-3">
-            <span className="text-[13px] font-medium text-pedra">Quem você está se tornando</span>
-            <ul className="flex flex-col gap-2.5">
-              {identities.map((identity) => (
-                <li
-                  key={identity.id}
-                  className="font-voz text-[15px] italic leading-relaxed text-areia"
-                >
-                  {identity.statement}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className="journey-journal">
+          <RotinaDeHoje />
+          <section id="vitorias" className="journey-wins" aria-labelledby="titulo-vitorias">
+            <div className="journey-section-heading">
+              <span className="journey-section-icon gold"><IconeEstrela tamanho={20} /></span>
+              <h2 id="titulo-vitorias" tabIndex={-1}>Vale guardar essa conquista</h2>
+            </div>
+            <p className="journey-help">O que aconteceu hoje que você quer lembrar?</p>
+            <VitoriasDoDia />
+          </section>
+
+          <section id="noite" className="journey-night" aria-labelledby="titulo-noite">
+            <div className="journey-section-heading">
+              <span className="journey-section-icon sky"><IconeLua tamanho={20} /></span>
+              <h2 id="titulo-noite" tabIndex={-1}>Pausa no acampamento</h2>
+            </div>
+            <p className="journey-help">Quando o dia terminar, guarde o que ficou.</p>
+            <RitualNoturno />
+          </section>
+          <div className="journey-identity"><AfirmacaoIdentidade /></div>
+        </div>
       </div>
-    </aside>
+    </main>
   )
 }

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm *)",
+      "PowerShell(npx --yes tsx src/domain/__restritivotest.ts)",
+      "Bash(npm run *)",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(npm i *)",
+      "Bash(node *)",
+      "Bash(npm rm *)",
+      "PowerShell(browser-use *)",
+      "Skill(browser-use)",
+      "PowerShell(\\(Get-Command browser-use -ErrorAction SilentlyContinue\\).Source; \\(Get-Command bu -ErrorAction SilentlyContinue\\).Source; \\(Get-Command browseruse -ErrorAction SilentlyContinue\\).Source)",
+      "Bash(git rebase *)",
+      "PowerShell($html = \\(Invoke-WebRequest -UseBasicParsing https://solo-system-personal.netlify.app\\).Content; $asset = [regex]::Match\\($html, 'assets/[^\"]+\\\\.js'\\).Value; $js = \\(Invoke-WebRequest -UseBasicParsing \"https://solo-system-personal.netlify.app/$asset\"\\).Content; \"bundle: $asset\"; \"tem RevisaoSemanal: $\\($js.Contains\\('semana'\\)\\)\"; \"tem 'Concluir semana': $\\($js.Contains\\('Concluir semana'\\)\\)\")",
+      "PowerShell(Start-Process -FilePath \"npx\" -ArgumentList \"vite\",\"preview\",\"--port\",\"4173\" -WorkingDirectory \"D:\\\\projetos\\\\Solo\" -WindowStyle Hidden; Start-Process -FilePath \"C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\" -ArgumentList \"--headless=new\",\"--remote-debugging-port=9333\",\"--user-data-dir=$env:TEMP\\\\solo-chrome-13b\",\"--no-first-run\" -WindowStyle Hidden; Start-Sleep -Seconds 5; node D:\\\\projetos\\\\Solo\\\\.tokensave\\\\verify-13b.mjs)"
+    ]
+  }
+}

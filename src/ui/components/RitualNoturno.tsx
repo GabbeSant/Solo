@@ -24,6 +24,7 @@ export function RitualNoturno() {
     <div className="flex flex-col gap-3">
       <button
         type="button"
+        aria-expanded={aberto}
         onClick={() => setAberto((v) => !v)}
         className={`flex w-full items-center justify-between gap-3 rounded-cartao border px-4 py-3.5 text-left transition-colors ${
           fechado
@@ -187,6 +188,8 @@ function NotaDoDia({ record, date }: BlocoProps) {
             <button
               key={n}
               type="button"
+              aria-pressed={ativo}
+              aria-label={`Nota ${n} de 5`}
               onClick={() => setDayRating(date, ativo ? null : n)}
               className={`flex h-11 flex-1 items-center justify-center rounded-xl border text-sm font-semibold tabular-nums transition-colors ${
                 ativo

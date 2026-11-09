@@ -1,33 +1,24 @@
 @import "tailwindcss";
 
 /*
- * Design System "Solo" — terra fértil à noite.
- *
- * Duas vozes tipográficas:
- *   font-voz   (Fraunces)        — quem você está se tornando: identidade, missão, reflexão.
- *   font-sans  (Instrument Sans) — o que você faz hoje: UI, hábitos, dados.
- *
- * Dois acentos com significado fixo:
- *   broto (verde-musgo) — crescer: checks, progresso, habilidades.
- *   brasa (âmbar)       — manter: streaks, marcos, ações principais.
- * Um terceiro, raro:
- *   sistema (azul etéreo) — quando o Sistema fala com você: dia fechado, marcos de sequência.
- *
- * Nunca vermelho para falha ou streak quebrado — dias ruins recebem neutralidade.
+ * Solo — aventura e evolução. Azul de expedição, verde de descoberta,
+ * dourado de direção. Instrument Sans dá unidade a títulos e controles.
+ * Os nomes dos tokens são preservados para manter as demais telas coerentes.
+ * O painel e as respostas da jornada ficam em journey.css.
  */
 @theme {
-  --color-solo: #141210; /* fundo — quase-preto com temperatura de terra */
-  --color-humus: #1e1a15; /* superfícies */
-  --color-relevo: #282218; /* superfície elevada / hover */
-  --color-linha: #2e2820; /* bordas e divisores */
-  --color-areia: #eae4d6; /* texto principal */
-  --color-pedra: #8f8778; /* texto secundário */
-  --color-broto: #9db87a; /* crescimento */
-  --color-brasa: #dda05c; /* consistência */
-  --color-sistema: #91a4d2; /* a voz do Sistema */
+  --color-solo: #101c36;
+  --color-humus: #182944;
+  --color-relevo: #243b59;
+  --color-linha: #354967;
+  --color-areia: #f5f8ff;
+  --color-pedra: #a9bad3;
+  --color-broto: #62e8ad;
+  --color-brasa: #ffc66e;
+  --color-sistema: #9dc2ff;
 
   --font-sans: "Instrument Sans Variable", system-ui, -apple-system, sans-serif;
-  --font-voz: "Fraunces Variable", Georgia, serif;
+  --font-voz: "Instrument Sans Variable", system-ui, sans-serif;
 
   --radius-cartao: 1rem;
 
@@ -84,9 +75,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* A voz serifada usa o eixo óptico baixo do Fraunces: quente, sem floreio. */
+/* Títulos com espaçamento mais firme, na mesma família dos controles. */
 .font-voz {
-  font-variation-settings: "opsz" 18;
+  letter-spacing: -0.025em;
 }
 
 :focus-visible {
@@ -100,6 +91,6 @@ body {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0s !important;
   }
 }

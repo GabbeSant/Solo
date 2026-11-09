@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  server: { watch: { ignored: ['**/.tokensave/**'] } },
   plugins: [
     react(),
     tailwindcss(),
@@ -15,8 +16,8 @@ export default defineConfig({
         short_name: 'Solo',
         description: 'Seu sistema pessoal de gestão de vida — missão, hábitos e rituais.',
         lang: 'pt-BR',
-        theme_color: '#0a0a0a',
-        background_color: '#0a0a0a',
+        theme_color: '#101c36',
+        background_color: '#101c36',
         display: 'standalone',
         start_url: '/',
         scope: '/',

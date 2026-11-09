@@ -45,22 +45,24 @@ function HabitoConstrutivo({ habit, record, records, date }: ItemProps) {
   return (
     <button
       type="button"
+      aria-pressed={feito}
       onClick={() => toggleHabitCheckIn(date, habit.id)}
-      className={`flex w-full items-center gap-3 rounded-cartao border px-4 py-3.5 text-left text-sm transition-colors ${
+      className={`habit-action flex w-full items-center gap-3 rounded-cartao border px-4 py-3.5 text-left text-sm transition-colors ${
         feito
           ? 'border-broto/40 bg-broto/10 text-pedra'
           : 'border-linha bg-humus text-areia hover:border-pedra/50'
       }`}
     >
       <span
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
+        className={`habit-check flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
           feito ? 'border-broto bg-broto text-solo' : 'border-linha bg-solo'
         }`}
       >
         {feito && <IconeCheck tamanho={12} className="animate-brotar" />}
       </span>
-      <span className={`flex-1 ${feito ? 'line-through decoration-pedra/50' : ''}`}>
+      <span className="flex-1">
         {habit.name}
+        {feito && <span className="habit-complete-caption">Feito!</span>}
       </span>
       {streak > 0 && (
         <span className="flex shrink-0 items-center gap-1 text-xs font-medium tabular-nums text-brasa">
